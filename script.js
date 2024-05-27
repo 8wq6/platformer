@@ -39,10 +39,11 @@ $(document).ready(function() {
         1350, 400, 50, 50, 'safe',
         1550, 300, 50, 50, 'safe',
         350, 250, 1050, 50, 'safe',
-        1300, 50, 50, 200, 'water',
-        1100, 100, 150, 150, 'die',
-        1000, 0, 350, 50, 'water',
-        900, 0, 140, 200, 'die',
+        1300, 10, 50, 240, 'water',
+        1100, 50, 150, 200, 'die',
+        1000, 0, 350, 10, 'water',
+        900, 0, 140, 150, 'die',
+        900, 200, 200, 10, 'water',
         // level 2
         // Platforms (safe)
         100, 900, 200, 20, 'safe',    // Platform at the bottom left
@@ -70,7 +71,7 @@ $(document).ready(function() {
         1250, 420, 50, 80, 'die'      // Deadly rectangle in the middle
     ];
 
-    let levelLength = [20, 19]; // Correctly represent the number of platforms on each level (not the number of levels)
+    let levelLength = [21, 19]; // Correctly represent the number of platforms on each level (not the number of levels)
     let level = 1;
 
     let bottom, top, left, right;
@@ -125,9 +126,12 @@ $(document).ready(function() {
                     xv = 0;
                 } else if (objects[newRel + 4] === 'die' || objects[newRel + 4] === 'lava') {
                     y += 7; if (isColliding(objects[newRel], objects[newRel + 1], objects[newRel + 2], objects[newRel + 3])) {
+                        y -= 7 + 3; if (isColliding(objects[newRel], objects[newRel + 1], objects[newRel + 2], objects[newRel + 3])) {
                         restart();
+                        console.log('x by x');
                         break;
-                    } else {y -= 7}
+                        }
+                    } else {y += 3}
                 }
             }
             y += 2;
@@ -149,10 +153,13 @@ $(document).ready(function() {
                         yv = -0.5 * yv;
                     }
                 } else if (objects[newRel + 4] === 'die' || objects[newRel + 4] === 'lava') {
-                    y += 5; if (isColliding(objects[newRel], objects[newRel + 1], objects[newRel + 2], objects[newRel + 3])) {
+                    y += 7; if (isColliding(objects[newRel], objects[newRel + 1], objects[newRel + 2], objects[newRel + 3])) {
+                        y -= 7 + 5; if (isColliding(objects[newRel], objects[newRel + 1], objects[newRel + 2], objects[newRel + 3])) {
                         restart();
+                        console.log('x by y');
                         break;
-                    } else {y -= 5}
+                        }
+                    } else {y += 5}
                 }
             }
         }
@@ -194,13 +201,13 @@ $(document).ready(function() {
 
             if (keys['ArrowUp'] || keys['w']) {
                 if (paddleUp) {
-                    yv += 10;
+                    yv += 9;
                     paddleUp = false;
                 }
             } else {paddleUp = true}
             if (keys['ArrowDown'] || keys['s']) {
                 if (paddleDown) {
-                    yv -= 8;
+                    yv -= 9;
                     paddleDown = false;
                 } 
             } else {paddleDown = true}
@@ -337,6 +344,7 @@ $(document).ready(function() {
     let frameCount = 0;
 
     function updateFPS() {
+        frameCount++;
         let currentTime = performance.now();
         let deltaTime = currentTime - lastTime;
         lastTime = currentTime;
@@ -368,7 +376,8 @@ $(document).ready(function() {
         ctx.fillText(`Y: ${svt}p/f`, 10, 60);
         ctx.fillText(`x: ${sx}`, 10, 80);
         ctx.fillText(`y: ${sy}`, 10, 100);
-        ctx.fillText(time, 10, 120);
+        ctx.fillText(`${time}s since death`, 10, 120);
+        ctx.fillText(`frame ${frameCount}`, 10, 140);
 
         function drawKey(x, y, label, active) {
             ctx.fillStyle = active ? activeColor : inactiveColor;
