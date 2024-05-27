@@ -1,4 +1,5 @@
 # my first game, a platformer
+## IF YOU FIND A BUG, PLEASE CREATE AN ISSUE<br>IF YOU FIND A FIX TO THE BUG, PLEASE CREATE A PULL REQUEST
 ## controls
 arrow keys, c to fly (for testing, gonna remove later)
 ## known bugs
