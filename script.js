@@ -209,10 +209,10 @@ $(document).ready(function() {
         xv *= inWater() ? 0.95 : friction;
 
         if (inWater()) {
-            yv *= 0.9;
+            yv *= 0.93;
             y -= size / 2;
             if (inWater()) {
-                yv -= 0.05;
+                // yv -= 0.05;
             }
             y += size / 2;
         } else {
