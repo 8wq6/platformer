@@ -1,7 +1,7 @@
 $(document).ready(function() {
     // Declare canvas element and context
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
     // Player variables
     let x = 100;
@@ -15,6 +15,10 @@ $(document).ready(function() {
     let onPlatform = false;
     let gravity = 1;
     let jumpHeight = 15;
+    let startTime = Date.now();
+
+    let uri = window.location.href;
+    let gui = uri.includes('?gui=true');
     
     // Objects and level
     let objects = [
@@ -77,6 +81,7 @@ $(document).ready(function() {
         xv = 0;
         yv = 0;
         onPlatform = false;
+        startTime = Date.now();
     }
 
     const getSides = () => {
@@ -176,8 +181,8 @@ $(document).ready(function() {
         }
 
         // Check for arrow keys
-        xv += (keys['ArrowRight'] ? (inWater() ? 0.5 * speed : speed) : 0) - (keys['ArrowLeft'] ? (inWater() ? 0.5 * speed : speed) : 0);
-        yv = (keys['ArrowUp'] && onGround() && !inWater()) ? jumpHeight : yv;
+        xv += (keys['ArrowRight'] || keys['d'] ? (inWater() ? 0.5 * speed : speed) : 0) - (keys['ArrowLeft'] || keys['a'] ? (inWater() ? 0.5 * speed : speed) : 0);
+        yv = ((keys['ArrowUp'] || keys['w']) && onGround() && !inWater()) ? jumpHeight : yv;
 
         const waterEnter = () => {
             yv *= 0.6;
@@ -187,13 +192,13 @@ $(document).ready(function() {
         if (inWater()) {
             if (waterCd) {waterCd = false; waterEnter()}
 
-            if (keys['ArrowUp']) {
+            if (keys['ArrowUp'] || keys['w']) {
                 if (paddleUp) {
                     yv += 10;
                     paddleUp = false;
                 }
             } else {paddleUp = true}
-            if (keys['ArrowDown']) {
+            if (keys['ArrowDown'] || keys['s']) {
                 if (paddleDown) {
                     yv -= 8;
                     paddleDown = false;
@@ -233,6 +238,10 @@ $(document).ready(function() {
             xv = 0;
             x = canvas.width - size
         }
+
+        if (keys['r']) {
+            restart()
+        } 
     }
 
     const render = () => {
@@ -243,7 +252,7 @@ $(document).ready(function() {
         let effect = Math.sin(Date.now() / 1000) * 10;
 
         // Render the player
-        ctx.fillStyle = "red";
+        ctx.fillStyle = 'red';
         ctx.fillRect(x, y, size, size);
 
         // Get relative
@@ -275,11 +284,14 @@ $(document).ready(function() {
 
         // Perform game calculations
         calc();
+
         // Render game objects
         render();
         
-        // Show the FPS
-        renderGUI();
+        if (gui) {
+            // Show the GUI if URL contains (?gui=true)
+            renderGUI();
+        }
 
         // Request the next frame
         requestAnimationFrame(gameLoop);
@@ -288,10 +300,6 @@ $(document).ready(function() {
     // Add keydown event listener
     document.addEventListener('keydown', function(event) {
         keys[event.key] = true;
-
-        if (event.key === 'r') {
-            restart()
-        } 
     });
 
     // Add keyup event listener
@@ -339,19 +347,28 @@ $(document).ready(function() {
     function renderGUI() {
         let sv = xv.toFixed(2);
         let svt = yv.toFixed(2);
+        let sx = x.toFixed(2); 
+        let sy = y.toFixed(2);
+        let time = Date.now() - startTime;
+        time = time / 1000;
+        time = time.toFixed(3);
         
         const keySize = 20;
         const paddingX = 100;
-        const paddingY = 10;
+        const paddingY = 5;
         const inactiveColor = '#cccccc';
         const activeColor = '#007aff';
 
-        ctx.fillStyle = "black";
-        ctx.font = "16px Arial";
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText(`FPS: ${fps}`, 35, 20); // Render FPS on canvas
-        ctx.fillText(`X: ${sv}p/f`, 40, 40);
-        ctx.fillText(`Y: ${svt}p/f`, 40, 60);
+        ctx.fillStyle = 'black';
+        ctx.font = '16px Arial';
+        ctx.textBaseline = 'middle'; // Set text baseline to middle
+        ctx.textAlign = 'left'; // Align text to the left  
+        ctx.fillText(`FPS: ${fps}`, 10, 20); // Render FPS on canvas
+        ctx.fillText(`X: ${sv}p/f`, 10, 40);
+        ctx.fillText(`Y: ${svt}p/f`, 10, 60);
+        ctx.fillText(`x: ${sx}`, 10, 80);
+        ctx.fillText(`y: ${sy}`, 10, 100);
+        ctx.fillText(time, 10, 120);
 
         function drawKey(x, y, label, active) {
             ctx.fillStyle = active ? activeColor : inactiveColor;
@@ -364,10 +381,11 @@ $(document).ready(function() {
         }
     
         function renderKeys() {
-            drawKey(paddingX, paddingY + keySize, '←', keys.ArrowLeft);
-            drawKey(paddingX + keySize, paddingY, '↑', keys.ArrowUp);
-            drawKey(paddingX + 2 * keySize, paddingY + keySize, '→', keys.ArrowRight);
-            drawKey(paddingX + keySize, paddingY + 2 * keySize, '↓', keys.ArrowDown);
+            drawKey(paddingX, paddingY + keySize, '←', keys.ArrowLeft || keys.a);
+            drawKey(paddingX + keySize, paddingY, '↑', keys.ArrowUp || keys.w);
+            drawKey(paddingX + 2 * keySize, paddingY + keySize, '→', keys.ArrowRight || keys.d);
+            drawKey(paddingX + keySize, paddingY + 2 * keySize, '↓', keys.ArrowDown || keys.s);
+            drawKey(paddingX + keySize, paddingY + keySize, 'R', keys.r);
         }
 
         renderKeys()
